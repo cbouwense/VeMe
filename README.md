@@ -1,8 +1,8 @@
-# VeMe
-###### Lightwiehgt Virtual Machine.
+### VeMe
+###### Lightweight Virtual Machine.
 ---
 
-## OpCode:
+### OpCode:
 
 `0 m` - Read from memory address m.
 
