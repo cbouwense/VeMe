@@ -1,10 +1,10 @@
 # VeMe
-##Virtual Machine using memory/memory model.
+## Lightwiehgt Virtual Machine.
 
-##OpCode:
+## OpCode:
 
-00 m r - STORE - Read from memory address and store contents in register r
+0 m: Read from memory address m.
 
-01 r m - WRITE - Write contents of register r to memory address m
+1 c m: Write value c to memory address m.
 
-10 r1 r2 - ADD - Add contents of r1 and r2, and store result in r1
+2 m1 m2: Add contents of m1 and m2, and store result in m1.
