@@ -8,19 +8,16 @@ typedef unsigned char byte;
 byte* memory;
 
 void vinit() {
-    printf("In vinit()\n");
     // Allocate memory and zero it out
     memory = calloc(MEM_SIZE, MEM_SIZE);
 }
 
 // Returns value held at mem address maddr
 byte vread(byte maddr) {
-    printf("In vread(%d)\n", maddr);
     return memory[maddr];
 }
 
 void vwrite(byte val, byte maddr) {
-    printf("Writing %d to address %d\n", val, maddr);
     memory[maddr] = val;
 
 }
@@ -53,11 +50,11 @@ void vexec(byte* program) {
     byte op1, op2, val, maddr1, maddr2;
     byte linePos = 0;
     while (program[linePos] != '\0') {
-        printf("detected %d\n", program[linePos]);
         switch (program[linePos]) {
             // Read
             case 0:
-                printf("%d\n", vread(program[++linePos]));
+                // TODO: this probably shouldn't just print lol
+		printf("%d\n", vread(program[++linePos]));
                 break;
             // Write
             case 1:

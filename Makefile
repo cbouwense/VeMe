@@ -7,6 +7,6 @@ clean:
 	$(RM) veme
 
 run:
-	veme
+	./veme
 
 .PHONY: run clean
