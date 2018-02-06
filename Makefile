@@ -1,6 +1,6 @@
 CFLAGS = -g -std=c99 -Iinclude/
 
-veme: src/veme.c
+veme: $(wildcard src/*.c)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 
 clean:
