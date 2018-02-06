@@ -24,14 +24,14 @@ int main(int argc, char** argv) {
 
     byte program4[] = {1, 5, 0, // Write the value of 5 to mem address 0
                        1, 6, 1, // Write the value of 6 to mem address 1
-                       2, 0, 1, // Add the contents of mem addresses 0 and 1, store in 0
+                       2, 0, 1, 2, // Add the contents of mem addresses 0 and 1, store in 2
                        '\0'};
 
     vinit();
 
     vexec(program4);
 
-    printNMem(1);
+    printNMem(5);
 
     return 0;
 }

@@ -19,13 +19,12 @@ byte vread(byte maddr) {
 
 void vwrite(byte val, byte maddr) {
     memory[maddr] = val;
-
 }
 
-void vadd(byte m1, byte m2) {
+void vadd(byte m1, byte m2, byte m3) {
     byte op1 = vread(m1);
     byte op2 = vread(m2);
-    vwrite(op1+op2, m1);
+    vwrite(op1+op2, m3);
 }
 
 void printMem() {
@@ -47,7 +46,7 @@ void printNMem(byte highest) {
 }
 
 void vexec(byte* program) {
-    byte op1, op2, val, maddr1, maddr2;
+    byte op1, op2, val, m1, m2, m3;
     byte linePos = 0;
     while (program[linePos] != '\0') {
         switch (program[linePos]) {
@@ -59,14 +58,15 @@ void vexec(byte* program) {
             // Write
             case 1:
                 val = program[++linePos];
-                maddr1 = program[++linePos];
-                vwrite(val, maddr1);
+                m1 = program[++linePos];
+                vwrite(val, m1);
                 break;
             // Add
             case 2:
-                maddr1 = program[++linePos];
-                maddr2 = program[++linePos];
-                vadd(maddr1, maddr2);
+                m1 = program[++linePos];
+                m2 = program[++linePos];
+                m3 = program[++linePos];
+                vadd(m1, m2, m3);
                 break;
             default:
                 printf("Error occured at %d\n", linePos);
