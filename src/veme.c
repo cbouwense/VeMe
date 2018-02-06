@@ -1,37 +1,82 @@
-/**
- * Main loop of processor
- * 
- * OPCODE:
- * 0 m1 m2: Read memory address m1 and store it in m2,
- * 1 c m    Write value c to memory address m.
- * 2 m1 m2: Add contents of memory addresses m1 and m2, store in m1
- */
+#include <stdio.h>
+#include <stdlib.h>
 
-#include "veme.h"
+#define MEM_SIZE 256
 
-int main(int argc, char** argv) {
+typedef unsigned char byte;
 
-    byte program1[] = {0, 2,    // Read memory address 2
-                       '\0'};
+byte* memory;
 
-    byte program2[] = {1, 5, 0, // Write the value of 5 to mem address 0
-                       0, 0,    // Read mem address 0
-                       '\0'};
+void vinit() {
+    printf("In vinit()\n");
+    // Allocate memory and zero it out
+    memory = calloc(MEM_SIZE, MEM_SIZE);
+}
 
-    byte program3[] = {1, 5, 0, // Write 5 to maddr 0
-                       1, 6, 1, // Write 6 to maddr 1
-                       '\0'};                       
+// Returns value held at mem address maddr
+byte vread(byte maddr) {
+    printf("In vread(%d)\n", maddr);
+    return memory[maddr];
+}
 
-    byte program4[] = {1, 5, 0, // Write the value of 5 to mem address 0
-                       1, 6, 1, // Write the value of 6 to mem address 1
-                       2, 0, 1, // Add the contents of mem addresses 0 and 1, store in 0
-                       '\0'};
+void vwrite(byte val, byte maddr) {
+    printf("Writing %d to address %d\n", val, maddr);
+    memory[maddr] = val;
 
-    vinit();
+}
 
-    vexec(program4);
+void vadd(byte m1, byte m2) {
+    byte op1 = vread(m1);
+    byte op2 = vread(m2);
+    vwrite(op1+op2, m1);
+}
 
-    printNMem(1);
+void printMem() {
+    for (byte i = 0; i < MEM_SIZE; i++) {
+        printf("memory[%d]: %d\n", i, memory[i]);
+        // Have to do this because counter overflows lol
+        if (i == MEM_SIZE-1)
+            break;
+    }
+}
 
-    return 0;
+void printNMem(byte highest) {
+    for (byte i = 0; i <= highest; i++) {
+        printf("memory[%d]: %d\n", i, memory[i]);
+        // Have to do this because counter overflows lol
+        if (i == MEM_SIZE-1)
+            break;
+    }
+}
+
+void vexec(byte* program) {
+    byte op1, op2, val, maddr1, maddr2;
+    byte linePos = 0;
+    while (program[linePos] != '\0') {
+        printf("detected %d\n", program[linePos]);
+        switch (program[linePos]) {
+            // Read
+            case 0:
+                printf("%d\n", vread(program[++linePos]));
+                break;
+            // Write
+            case 1:
+                val = program[++linePos];
+                maddr1 = program[++linePos];
+                vwrite(val, maddr1);
+                break;
+            // Add
+            case 2:
+                maddr1 = program[++linePos];
+                maddr2 = program[++linePos];
+                vadd(maddr1, maddr2);
+                break;
+            default:
+                printf("Error occured at %d\n", linePos);
+                printf("Invalid input %d detected\n", program[linePos]);
+                exit(1);
+        }
+        linePos++;
+    }
+    printf("Program executed successfully\n");
 }
