@@ -2,56 +2,58 @@
 #include <stdlib.h>
 
 #define MEM_SIZE 256
+#define REG_NO 10
+// TODO: Is this even good practice
+#define stackPtr registers[REG_NO-1]
+// TODO: Do we actually need an instruction pointer?
+#define instrPtr registers[REG_NO-2]
+#define NEXT_TOKEN program[++linePos]
 
 typedef unsigned char byte;
 
 byte* memory;
-byte stackPtr;
-// TODO: Do we actually need an instruction pointer?
-byte instrPtr;
+byte registers[REG_NO];
+
+/* Register Operations */
+
+// TODO: Is this really all read should do?
+void vread(byte regNo) {
+    printf("%i\n", registers[regNo]);
+}
+
+// TODO: Check regNo bounds
+void vwrite(byte regNo, byte val) {
+    registers[regNo] = val;
+}
 
 /* Memory Operations */
 
-// Returns value held at mem address maddr
-byte vread(byte maddr) {
-    return memory[maddr];
+void vload(byte regNo, byte maddr) {
+    registers[regNo] = memory[maddr];
 }
 
-void vwrite(byte val, byte maddr) {
-    memory[maddr] = val;
+void vstore(byte maddr, byte regNo) {
+    memory[maddr] = registers[regNo];
 }
 
-void vadd(byte m1, byte m2, byte m3) {
-    byte op1 = vread(m1);
-    byte op2 = vread(m2);
-    vwrite(op1+op2, m3);
+void vadd(byte r1, byte r2, byte r3) {
+    // TODO: Should I refactor this so that you use read?
+    byte op1 = registers[r1];
+    byte op2 = registers[r2];
+    vwrite(r3, op1+op2);
 }
 
 /* Stack Operations */
+// TODO: I should probably check for overflow/underflow
+//       but I also think it could be cool to leave them in.
 
-void vpush(byte val) {
-    // TODO: I'm should probably check for overflow
-
-    memory[stackPtr] = val;
+void vpush(byte regNo) {
+    memory[stackPtr] = registers[regNo];
     stackPtr--;
 }
 
-byte vpop() {
-    // This is the soyboy implementation that checks for underflow
-    /*
-    byte val = 0;
-    if (stackPtr < MEM_SIZE) {
-        val = memory[stackPtr];
-    }
-    else {
-        printf("Nothing on stack to pop, exiting.");
-        exit(1);
-    }
-    return val;
-    */
-
-    // This is the alpha implementation that doesn't care about underflow
-    return memory[++stackPtr];
+byte vpop(byte regNo) {
+    registers[regNo] = memory[++stackPtr];
 }
 
 /* Meta Operations */
@@ -65,38 +67,51 @@ void vinit() {
 }
 
 void vexec(byte* program) {
-    byte op1, op2, val, m1, m2, m3;
+    
+    byte op1, op2, val, m1, m2, r1, r2, r3;
     byte linePos = 0;
-    while (program[linePos] != '\0') {
+
+    while (program[linePos] != 'e') {
         switch (program[linePos]) {
             // READ
             case 0:
-                // TODO: this probably shouldn't just print lol
-		printf("%d\n", vread(program[++linePos]));
+                r1 = NEXT_TOKEN;
+                vread(r1);
                 break;
             // WRITE
-            case 1:
-                val = program[++linePos];
-                m1 = program[++linePos];
-                vwrite(val, m1);
+            case 1: 
+                r1 = NEXT_TOKEN;
+                val = NEXT_TOKEN;
+                vwrite(r1, val);
+                break;
+            // LOAD
+            case 2:
+                r1 = NEXT_TOKEN;
+                m1 = NEXT_TOKEN;
+                vload(r1, m1);
+                break;
+            // STORE
+            case 3:
+                m1 = NEXT_TOKEN;
+                r1 = NEXT_TOKEN;
+                vstore(m1, r1);
                 break;
             // PUSH
-            case 2:
-                val = program[++linePos];
-                vpush(val);
+            case 4:
+                r1 = NEXT_TOKEN;
+                vpush(r1);
                 break;
             // POP
-            case 3:
-                m1 = program[++linePos];
-                val = vpop();
-                vwrite(val, m1);
+            case 5:
+                r1 = NEXT_TOKEN;
+                vpop(r1);
                 break;
             // ADD
-            case 4:
-                m1 = program[++linePos];
-                m2 = program[++linePos];
-                m3 = program[++linePos];
-                vadd(m1, m2, m3);
+            case 6:
+                r1 = NEXT_TOKEN;
+                r2 = NEXT_TOKEN;
+                r3 = NEXT_TOKEN;
+                vadd(r1, r2, r3);
                 break;
             default:
                 printf("Error occured at %d\n", linePos);
@@ -108,8 +123,6 @@ void vexec(byte* program) {
     printf("Program executed successfully\n");
 }
 
-/* Misc Operations */
-
 void printMem() {
     for (byte i = 0; i < MEM_SIZE; i++) {
         printf("memory[%d]: %d\n", i, memory[i]);
@@ -119,8 +132,8 @@ void printMem() {
     }
 }
 
-void printNMem(byte highest) {
-    for (byte i = 0; i <= highest; i++) {
+void printNMem(byte addresses) {
+    for (byte i = 0; i < addresses; i++) {
         printf("memory[%d]: %d\n", i, memory[i]);
         // Have to do this because counter overflows lol
         if (i == MEM_SIZE-1)
@@ -128,3 +141,12 @@ void printNMem(byte highest) {
     }
 }
 
+void printReg(byte regNo) {
+    printf("reg %i: %i\n", regNo, registers[regNo]);
+}
+
+void printAllReg() {
+    for (byte i = 0; i < REG_NO; i++) {
+        printReg(i);
+    }
+}
