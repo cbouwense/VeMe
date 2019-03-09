@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "veme.h"
 
 #define MEM_SIZE 256
 #define REG_NO 10
